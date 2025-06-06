@@ -1,17 +1,20 @@
 import flet as ft
 
-from components import Title
-from controllers import Updater
-from version import VERSION
+from controllers import Router, Updater
 
 
-def main(page: ft.Page) -> None:
-    page.title = "invox"
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.add(Title(f"invox version {VERSION}"))
+class Main:
+    def __init__(self, page: ft.Page) -> None:
+        self.page = page
+        self.configure_page()
+        self.__init_app__()
 
-    Updater(page)
+    def configure_page(self) -> None:
+        self.page.title = "invox"
+
+    def __init_app__(self) -> None:
+        Router(self.page)
+        Updater(self.page)
 
 
-ft.app(main)
+ft.app(Main)
