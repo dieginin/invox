@@ -55,11 +55,13 @@ class Updater:
     def check_for_updates(self) -> None:
         parse_version = lambda v: tuple(map(int, v.split(".")))
 
+        self.page.overlay.append(ft.ProgressBar())
         info_snackbar(self.page, "Checking for updates...")
         time.sleep(uniform(0, 1))
 
         try:
             latest_version, download_url = get_latest_version()
+            self.page.overlay.clear()
             if parse_version(latest_version) > parse_version(VERSION):
                 accept_dialog(
                     self.page,
