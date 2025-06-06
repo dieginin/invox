@@ -8,14 +8,14 @@ class Main:
         self.page = page
 
         self.__init_confg__()
-        self.__init_wndow__()
+        self.__init_windw__()
         self.__init_ctrls__()
 
     def __init_confg__(self) -> None:
         self.page.title = "invox"
         self.page.theme = ft.Theme(color_scheme_seed="deepPurple")
 
-    def __init_wndow__(self) -> None:
+    def __init_windw__(self) -> None:
         width, height = 800, 628
         self.page.window.width = width
         self.page.window.height = height
