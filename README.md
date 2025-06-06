@@ -1,4 +1,4 @@
-# Invox 📊💸
+# invox 📊💸
 
 **Invox** is a simple and efficient application designed to keep track of your income and expenses. Perfect for small businesses, personal projects, freelancers, or anyone who wants to stay organized and have a clear view of their financial activity.
 
@@ -64,4 +64,4 @@ If you'd like to contribute, report issues, or suggest new features, feel free t
 
 ---
 
-💾 **Invox** — because your money deserves to be well organized.
+💾 **invox** — because your money deserves to be well organized.
