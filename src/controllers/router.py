@@ -8,7 +8,7 @@ from components import Subtitle
 def get_routes(directory: str) -> dict:
     routes = {}
 
-    for file in os.listdir(directory):
+    for file in os.listdir(f"src/{directory}"):
         if file.endswith(".py"):
             module_name = file[:-3]
             module = __import__(f"{directory}.{module_name}", fromlist=[module_name])
@@ -52,7 +52,7 @@ class Router:
 
     def on_route_change(self, e: ft.RouteChangeEvent) -> None:
         e.page.views.clear()
-        routes = get_routes("src/views")
+        routes = get_routes("views")
 
         view = routes.get(e.route, PageNotFoundView)
         e.page.views.append(view(e.page))
