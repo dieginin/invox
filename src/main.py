@@ -11,6 +11,7 @@ class Main:
 
     def __init_confg__(self) -> None:
         self.page.title = "invox"
+        self.page.theme = ft.Theme(color_scheme_seed="deepPurple")
 
     def __init_ctrls__(self) -> None:
         Router(self.page)
