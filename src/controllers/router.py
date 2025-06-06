@@ -55,7 +55,7 @@ class Router:
         routes = get_routes("views")
 
         view = routes.get(e.route, PageNotFoundView)
-        e.page.views.append(view(e.page))
+        e.page.views.append(view())
 
         try:
             e.page.title = f"invox - {view.name}"
