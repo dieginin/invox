@@ -57,9 +57,9 @@ class Router:
         view = routes.get(e.route, PageNotFoundView)
         e.page.views.append(view(e.page))
 
-        if e.route == "/":
+        try:
+            e.page.title = f"invox - {view.name}"
+        except AttributeError:
             e.page.title = "invox"
-        else:
-            e.page.title = f"invox - {e.route[1:].capitalize()}"
 
         e.page.update()
