@@ -61,6 +61,7 @@ class Updater:
         try:
             latest_version, download_url = get_latest_version()
             self.page.overlay.clear()
+
             if parse_version(latest_version) > parse_version(VERSION):
                 accept_dialog(
                     self.page,
