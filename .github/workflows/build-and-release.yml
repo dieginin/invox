@@ -112,10 +112,20 @@ jobs:
         with:
           path: artifacts
 
+      - name: Set prerelease flag
+        id: prerelease
+        run: |
+          if [[ "${{ github.ref_name }}" == *"-"* ]]; then
+            echo "PRERELEASE=true" >> $GITHUB_ENV
+          else
+            echo "PRERELEASE=false" >> $GITHUB_ENV
+          fi
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2.2.2
         with:
           files: |
             artifacts/**/*
+          prerelease: ${{ env.PRERELEASE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

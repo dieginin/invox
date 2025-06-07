@@ -8,6 +8,7 @@ from typing import Callable, Optional
 
 import flet as ft
 import requests
+from packaging.version import parse as parse_version
 
 from components import (
     Subtitle,
@@ -53,8 +54,6 @@ class Updater:
         self.check_for_updates()
 
     def check_for_updates(self) -> None:
-        parse_version = lambda v: tuple(map(int, v.split(".")))
-
         self.page.overlay.append(ft.ProgressBar())
         info_snackbar(self.page, "Checking for updates...")
         time.sleep(uniform(0, 1))
