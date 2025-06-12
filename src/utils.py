@@ -194,16 +194,22 @@ COLOR_HEX_MAP = {
 }
 
 
-def button_style(color: str, variant: bool = False) -> ft.ButtonStyle:
+def button_style(
+    color: str,
+    variant: bool = False,
+    shape: ft.ControlStateValue[ft.OutlinedBorder] = None,
+) -> ft.ButtonStyle:
     if variant:
         return ft.ButtonStyle(
             color=f"on{color}container",
             bgcolor=f"{color}container",
             overlay_color=f"{color},.1",
+            shape=shape,
         )
     else:
         return ft.ButtonStyle(
             color=f"on{color}",
             bgcolor=color,
             overlay_color=f"{color}container,.1",
+            shape=shape,
         )
