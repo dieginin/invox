@@ -5,7 +5,7 @@ description = "An app for managing invoices and expenses"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [{ name = "NextBale", email = "diegobalestra9@gmail.com" }]
-dependencies = ["flet==0.28.3"]
+dependencies = ["flet==0.28.3", "tinydb"]
 
 [tool.flet]
 org = "com.nextbale"
