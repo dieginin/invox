@@ -1,3 +1,5 @@
+import flet as ft
+
 COLOR_HEX_MAP = {
     "red50": "#FFEBEE",
     "red100": "#FFCDD2",
@@ -190,3 +192,18 @@ COLOR_HEX_MAP = {
     "blueGray800": "#37474F",
     "blueGray900": "#263238",
 }
+
+
+def button_style(color: str, variant: bool = False) -> ft.ButtonStyle:
+    if variant:
+        return ft.ButtonStyle(
+            color=f"on{color}container",
+            bgcolor=f"{color}container",
+            overlay_color=f"{color},.1",
+        )
+    else:
+        return ft.ButtonStyle(
+            color=f"on{color}",
+            bgcolor=color,
+            overlay_color=f"{color}container,.1",
+        )
