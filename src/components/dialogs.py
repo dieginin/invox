@@ -39,13 +39,14 @@ def accept_dialog(
     content: ft.Control,
     on_accept: Callable,
     accept_txt: str = "Accept",
-) -> None:
+) -> _AlertDialog:
     dialog = _show_dialog(
         page,
         title,
         content,
         [ft.TextButton(accept_txt, on_click=lambda _: (dialog.close(), on_accept()))],
     )
+    return dialog
 
 
 def confirmation_dialog(
@@ -55,7 +56,7 @@ def confirmation_dialog(
     on_confirm: Callable,
     on_cancel: Optional[Callable] = None,
     confirm_txt: str = "Confirm",
-) -> None:
+) -> _AlertDialog:
     dialog = _show_dialog(
         page,
         title,
@@ -70,6 +71,7 @@ def confirmation_dialog(
             ),
         ],
     )
+    return dialog
 
 
 def info_dialog(
@@ -77,7 +79,7 @@ def info_dialog(
     title: str,
     content: ft.Control,
     on_close: Optional[Callable] = None,
-) -> None:
+) -> _AlertDialog:
     dialog = _show_dialog(
         page,
         title,
@@ -89,3 +91,4 @@ def info_dialog(
             )
         ],
     )
+    return dialog
