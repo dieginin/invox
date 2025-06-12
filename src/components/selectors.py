@@ -100,20 +100,221 @@ class MonthSelector(ft.Row):
             ),
         )
 
-    def prev_month(self, _) -> None:
+    def prev_month(self, *args) -> None:
         month = self.date.month - 1 or 12
         year = self.date.year - (1 if self.date.month == 1 else 0)
         self.date = self.date.replace(year=year, month=month)
         self.update_month_display()
+        self.on_change(args) if self.on_change else None
 
-    def next_month(self, _) -> None:
+    def next_month(self, *args) -> None:
         month = self.date.month + 1 if self.date.month < 12 else 1
         year = self.date.year + (1 if self.date.month == 12 else 0)
         self.date = self.date.replace(year=year, month=month)
         self.update_month_display()
+        self.on_change(args) if self.on_change else None
 
     def update_month_display(self) -> None:
         self.month_button.text = (
             self.date.strftime("%B %Y") if self._show_year else self.date.strftime("%B")
         )
+        self.update()
+
+
+class DateSelector(ft.Row):
+    def __init__(
+        self,
+        initial_date: Optional[datetime] = None,
+        on_change: Optional[Callable] = None,
+    ) -> None:
+        super().__init__()
+        self.date = initial_date or datetime.today()
+        self.on_change = on_change
+        self.alignment = ft.MainAxisAlignment.CENTER
+
+        self.first_date = self.date.replace(day=1)
+        self.last_date = self.date.replace(
+            day=calendar.monthrange(self.date.year, self.date.month)[1]
+        )
+
+        self.first_date_button = ft.TextButton(
+            self.first_date.strftime("%d %B %y"),
+            style=button_style(
+                "primary",
+                variant=True,
+                shape=ft.RoundedRectangleBorder(),
+            ),
+            height=45,
+            width=150,
+            on_click=self.open_first_date_dialog,
+        )
+        self.last_date_button = ft.TextButton(
+            self.last_date.strftime("%d %B %y"),
+            style=button_style(
+                "primary",
+                variant=True,
+                shape=ft.RoundedRectangleBorder(),
+            ),
+            height=45,
+            width=150,
+            on_click=self.open_last_date_dialog,
+        )
+
+        first_date = ft.Row(
+            [
+                ft.IconButton(
+                    icon=ft.Icons.ARROW_BACK,
+                    style=button_style(
+                        "primary",
+                        variant=True,
+                        shape=ft.RoundedRectangleBorder(
+                            ft.border_radius.horizontal(25, 0)
+                        ),
+                    ),
+                    height=45,
+                    width=45,
+                ),
+                self.first_date_button,
+                ft.IconButton(
+                    icon=ft.Icons.ARROW_FORWARD,
+                    style=button_style(
+                        "primary",
+                        variant=True,
+                        shape=ft.RoundedRectangleBorder(
+                            ft.border_radius.horizontal(0, 25)
+                        ),
+                    ),
+                    height=45,
+                    width=45,
+                ),
+            ],
+            spacing=0,
+        )
+        last_date = ft.Row(
+            [
+                ft.IconButton(
+                    icon=ft.Icons.ARROW_BACK,
+                    style=button_style(
+                        "primary",
+                        variant=True,
+                        shape=ft.RoundedRectangleBorder(
+                            ft.border_radius.horizontal(25, 0)
+                        ),
+                    ),
+                    height=45,
+                    width=45,
+                ),
+                self.last_date_button,
+                ft.IconButton(
+                    icon=ft.Icons.ARROW_FORWARD,
+                    style=button_style(
+                        "primary",
+                        variant=True,
+                        shape=ft.RoundedRectangleBorder(
+                            ft.border_radius.horizontal(0, 25)
+                        ),
+                    ),
+                    height=45,
+                    width=45,
+                ),
+            ],
+            spacing=0,
+        )
+        self.controls = [first_date, last_date]
+        self.spacing = 10
+
+    def open_first_date_dialog(self, e: ft.ControlEvent) -> None:
+        self.open_date_dialog(
+            e, "Select first date", self.first_date, self.set_first_date
+        )
+
+    def open_last_date_dialog(self, e: ft.ControlEvent) -> None:
+        self.open_date_dialog(e, "Select last date", self.last_date, self.set_last_date)
+
+    def open_date_dialog(
+        self,
+        e: ft.ControlEvent,
+        title: str,
+        selected_date: datetime,
+        date_callback: Callable,
+    ) -> None:
+        day_grid = ft.Column(spacing=5)
+        last_date = self.date.replace(
+            day=calendar.monthrange(selected_date.year, selected_date.month)[1]
+        )
+
+        def update_days() -> None:
+            buttons = []
+            for d in range(1, last_date.day + 1):
+                current_date = selector.date
+                is_selected = (
+                    d == selected_date.day
+                    and selected_date.month == current_date.month
+                    and selected_date.year == current_date.year
+                )
+
+                btn = ft.TextButton(
+                    str(d),
+                    style=button_style("primary", variant=not is_selected),
+                    width=45,
+                    disabled=is_selected,
+                    on_click=(
+                        None
+                        if is_selected
+                        else lambda _, day=d: select_date(
+                            current_date.year, current_date.month, day
+                        )
+                    ),
+                )
+                buttons.append(btn)
+
+                if len(buttons) == 8 or d == last_date.day:
+                    day_grid.controls.append(
+                        ft.Row(
+                            buttons, alignment=ft.MainAxisAlignment.CENTER, spacing=5
+                        )
+                    )
+                    buttons = []
+
+        def select_date(year: int, month: int, day: int) -> None:
+            date_callback(selected_date.replace(year, month, day))
+            e.page.close(dialog)
+
+        def change_month() -> None:
+            self.date = selector.date
+            day_grid.clean()
+            update_days()
+            day_grid.update()
+
+        selector = MonthSelector(
+            selected_date,
+            month_selectable=False,
+            show_year=True,
+            on_change=lambda _: change_month(),
+        )
+        update_days()
+        dialog = info_dialog(
+            e.page,
+            title,
+            ft.Column(
+                [
+                    selector,
+                    day_grid,
+                ],
+                spacing=10,
+                tight=True,
+            ),
+        )
+
+    def set_first_date(self, new_date: datetime) -> None:
+        self.first_date = new_date
+        self.update_date_display()
+
+    def set_last_date(self, new_date: datetime) -> None:
+        self.last_date = new_date
+        self.update_date_display()
+
+    def update_date_display(self) -> None:
+        self.first_date_button.text = self.first_date.strftime("%d %B %y")
+        self.last_date_button.text = self.last_date.strftime("%d %B %y")
         self.update()
