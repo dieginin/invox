@@ -281,12 +281,12 @@ class DateSelector(ft.Row):
                     and selected_date.year == current_date.year
                 )
 
-                is_disabled = False
-                if (
+                current_btn_date = datetime(selector.date.year, selector.date.month, d)
+                is_disabled = (
                     min_date
-                    and datetime(selector.date.year, selector.date.month, d) < min_date
-                ):
-                    is_disabled = True
+                    and current_btn_date < min_date
+                    and current_btn_date.date() != min_date.date()
+                )
 
                 btn = ft.TextButton(
                     str(d),
