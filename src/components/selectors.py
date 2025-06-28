@@ -291,7 +291,7 @@ class DateSelector(ft.Row):
                 btn = ft.TextButton(
                     str(d),
                     style=(
-                        button_style("primary", variant=is_selected)
+                        button_style("primary", variant=not is_selected)
                         if not is_disabled
                         else button_style("tertiary")
                     ),
