@@ -8,6 +8,77 @@ from utils import button_style
 
 from .dialogs import info_dialog
 
+# TODO Add limits
+
+
+class _YearSelector(ft.Row):
+    def __init__(
+        self,
+        initial_year: Optional[int] = None,
+        on_click: Optional[Callable] = None,
+    ) -> None:
+        super().__init__()
+        self._initial_year = initial_year
+        self.year = initial_year or datetime.today().year
+        self.alignment = ft.MainAxisAlignment.CENTER
+
+        self.year_button = ft.TextButton(
+            f"{self.year}",
+            style=button_style(
+                "primary",
+                variant=False,
+                shape=ft.RoundedRectangleBorder(),
+            ),
+            height=45,
+            width=55,
+            on_click=on_click,
+            disabled=True,
+        )
+        self.controls = [
+            ft.IconButton(
+                icon=ft.Icons.ARROW_BACK,
+                style=button_style(
+                    "primary",
+                    variant=True,
+                    shape=ft.RoundedRectangleBorder(ft.border_radius.horizontal(25, 0)),
+                ),
+                height=45,
+                width=45,
+                on_click=self.prev_year,
+            ),
+            self.year_button,
+            ft.IconButton(
+                icon=ft.Icons.ARROW_FORWARD,
+                style=button_style(
+                    "primary",
+                    variant=True,
+                    shape=ft.RoundedRectangleBorder(ft.border_radius.horizontal(0, 25)),
+                ),
+                height=45,
+                width=45,
+                on_click=self.next_year,
+            ),
+        ]
+        self.spacing = 0
+
+    def prev_year(self, _) -> None:
+        self.year -= 1
+        self.update_year_display()
+
+    def next_year(self, _) -> None:
+        self.year += 1
+        self.update_year_display()
+
+    def update_year_display(self) -> None:
+        self.year_button.text = f"{self.year}"
+        self.year_button.style = button_style(
+            "primary",
+            variant=not self.year == self._initial_year,
+            shape=ft.RoundedRectangleBorder(),
+        )
+        self.year_button.disabled = self.year == self._initial_year
+        self.update()
+
 
 class MonthSelector(ft.Row):
     def __init__(
@@ -15,23 +86,21 @@ class MonthSelector(ft.Row):
         initial_date: Optional[datetime] = None,
         on_change: Optional[Callable] = None,
         month_selectable: bool = True,
-        show_year: bool = False,
     ) -> None:
         super().__init__()
         self.date = initial_date or datetime.today()
         self.on_change = on_change
         self.alignment = ft.MainAxisAlignment.CENTER
 
-        self._show_year = show_year
         self.month_button = ft.TextButton(
-            self.date.strftime("%B %Y") if show_year else self.date.strftime("%B"),
+            self.date.strftime("%B %Y"),
             style=button_style(
                 "primary",
                 variant=True,
                 shape=ft.RoundedRectangleBorder(),
             ),
             height=45,
-            width=150 if show_year else 95,
+            width=150,
             disabled=not month_selectable,
             on_click=self.open_month_dialog,
         )
@@ -64,8 +133,13 @@ class MonthSelector(ft.Row):
         self.spacing = 0
 
     def open_month_dialog(self, e: ft.ControlEvent) -> None:
+        def select_year(_) -> None:
+            self.date = self.date.replace(year_selector.year)
+            e.page.close(dialog)
+            self.update_month_display()
+
         def select_month(month: int) -> None:
-            self.date = self.date.replace(month=month)
+            self.date = self.date.replace(year_selector.year, month)
             e.page.close(dialog)
             self.update_month_display()
 
@@ -76,7 +150,7 @@ class MonthSelector(ft.Row):
 
             btn = ft.TextButton(
                 month_name,
-                on_click=(None if is_current else lambda _, m=i: select_month(m)),
+                on_click=lambda _, m=i: select_month(m),
                 style=button_style("primary", variant=not is_current),
                 width=95,
                 disabled=is_current,
@@ -88,14 +162,21 @@ class MonthSelector(ft.Row):
             "Select a month",
             ft.Column(
                 [
-                    ft.Row(
-                        buttons[i : i + 3],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        spacing=10,
-                    )
-                    for i in range(0, 12, 3)
+                    year_selector := _YearSelector(
+                        self.date.year, on_click=select_year
+                    ),
+                    ft.Column(
+                        [
+                            ft.Row(
+                                buttons[i : i + 3],
+                                alignment=ft.MainAxisAlignment.CENTER,
+                                spacing=10,
+                            )
+                            for i in range(0, 12, 3)
+                        ]
+                    ),
                 ],
-                spacing=10,
+                spacing=20,
                 tight=True,
             ),
         )
@@ -103,21 +184,19 @@ class MonthSelector(ft.Row):
     def prev_month(self, *args) -> None:
         month = self.date.month - 1 or 12
         year = self.date.year - (1 if self.date.month == 1 else 0)
-        self.date = self.date.replace(year=year, month=month, day=1)
+        self.date = self.date.replace(year, month, 1)
         self.update_month_display()
         self.on_change(args) if self.on_change else None
 
     def next_month(self, *args) -> None:
         month = self.date.month + 1 if self.date.month < 12 else 1
         year = self.date.year + (1 if self.date.month == 12 else 0)
-        self.date = self.date.replace(year=year, month=month, day=1)
+        self.date = self.date.replace(year, month, 1)
         self.update_month_display()
         self.on_change(args) if self.on_change else None
 
     def update_month_display(self) -> None:
-        self.month_button.text = (
-            self.date.strftime("%B %Y") if self._show_year else self.date.strftime("%B")
-        )
+        self.month_button.text = self.date.strftime("%B %Y")
         self.update()
 
 
@@ -218,12 +297,8 @@ class DateSelector(ft.Row):
                     ),
                     width=45,
                     disabled=is_selected or is_disabled,
-                    on_click=(
-                        None
-                        if is_selected or is_disabled
-                        else lambda _, day=d: select_date(
-                            current_date.year, current_date.month, day
-                        )
+                    on_click=lambda _, day=d: select_date(
+                        current_date.year, current_date.month, day
                     ),
                 )
                 buttons.append(btn)
@@ -247,10 +322,7 @@ class DateSelector(ft.Row):
             day_grid.update()
 
         selector = MonthSelector(
-            selected_date,
-            month_selectable=False,
-            show_year=True,
-            on_change=lambda _: change_month(),
+            selected_date, month_selectable=False, on_change=lambda _: change_month()
         )
         update_days()
         dialog = info_dialog(
